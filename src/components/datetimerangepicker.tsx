@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { addDays, format } from "date-fns"
+import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
-import { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -13,7 +12,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-
+export type DateRange = {
+  startDate: Date | null;
+  endDate: Date | null;
+};
 type DateTimeRangePickerProps = React.HTMLAttributes<HTMLDivElement> & {
   date: DateRange | undefined
   setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
@@ -39,11 +41,11 @@ export function DateTimeRangePicker({
   const handleSaveTime = () => closeDropdown()
 
   const formatDateRangeText = () => {
-    if (!date?.from) return "Pick a date range"
-    if (date.to) {
-      return `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
+    if (!date?.startDate) return "Pick a date range"
+    if (date.endDate) {
+      return `${format(date.startDate, "LLL dd, y")} - ${format(date.endDate, "LLL dd, y")}`
     }
-    return format(date.from, "LLL dd, y")
+    return format(date.startDate, "LLL dd, y")
   }
 
 return (
@@ -67,7 +69,7 @@ return (
 <Calendar
   initialFocus
   mode="range"
-  defaultMonth={date?.from}
+  defaultMonth={date?.startDate}
   selected={date}
   onSelect={setDate}
   numberOfMonths={2}

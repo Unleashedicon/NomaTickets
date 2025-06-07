@@ -3,6 +3,7 @@ import { useState } from "react";
 import "flowbite";
 import { Oswald } from "next/font/google";
 import { Ticket } from 'lucide-react';
+import Link from "next/link";
 
 const oswald = Oswald({ weight: ["400", "700"], subsets: ["latin"] });
 
@@ -15,10 +16,10 @@ export default function MyNavbar() {
       <nav className={`border-black bg-white dark:bg-black dark:border-white ${oswald.className}`}>
         <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
           {/* Logo */}
-          <a href="/" className="flex flex-col items-center text-center">
+<Link href="/" className="flex flex-col items-center text-center">
                           <Ticket className="h-8 w-8 text-[#1D4ED8]" />
               <span className="text-xl font-bold text-[#111827]">NomaTickets</span>
-          </a>
+          </Link>
 
           {/* Search Bar */}
           <form className="flex-grow flex items-center gap-2">

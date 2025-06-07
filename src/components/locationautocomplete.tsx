@@ -27,7 +27,7 @@ export default function LocationAutocomplete({
         const res = await axios.get("https://photon.komoot.io/api/", {
           params: { q: query },
         });
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
         const results = res.data.features.map((feature: any) => ({
           name: feature.properties.name,
           city: feature.properties.city,

@@ -75,7 +75,6 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
 
@@ -136,7 +135,6 @@ const HomePage = () => {
     setSelectedCategory('');
     setSelectedDate('');
     setSelectedLocation('');
-    setCoordinates(null);
     setFilteredEvents([...mockEvents]);
     setIsFilterApplied(false);
   };
@@ -216,7 +214,6 @@ const HomePage = () => {
                 onSelect={(loc) => {
                   const readable = `${loc.name}, ${loc.city ?? ''}, ${loc.country ?? ''}`.trim();
                   setSelectedLocation(readable);
-                  setCoordinates(loc.coordinates);
                 }}
               />
             </div>

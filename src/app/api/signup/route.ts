@@ -32,8 +32,14 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ user: newUser });
-  } catch (error: any) {
+  }catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error("Signup error:", error.message);
+  } else {
     console.error("Signup error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
+
+  return NextResponse.json({ error: "Server error" }, { status: 500 });
+}
+
 }

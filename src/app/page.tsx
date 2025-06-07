@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import HomePage from "@/components/home"
 export const dynamic = "force-dynamic";
 

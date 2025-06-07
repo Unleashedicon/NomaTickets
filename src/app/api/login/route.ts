@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     // 4. (Optional) Create a session/token here for authentication (e.g., JWT, NextAuth, etc.)
 
     // 5. Return success with user info (omit password!)
-    const { password: _, ...userWithoutPassword } = user;
+const { password: _passwordExcluded, ...userWithoutPassword } = user;
     return NextResponse.json({ user: userWithoutPassword });
   } catch (error) {
     console.error("Login error:", error);

@@ -136,7 +136,7 @@ const router = useRouter();
                 <CardHeader>
                   <CardTitle>Your Created Events</CardTitle>
                   <p className="text-muted-foreground">
-                    Events you've created and are hosting.
+                    Events you have created and are hosting.
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -159,7 +159,7 @@ events={createdEvents}
               <CardHeader>
                 <CardTitle>Bookmarked Events</CardTitle>
                 <p className="text-muted-foreground">
-                  Events you're interested in attending.
+                  Events you are interested in attending.
                 </p>
               </CardHeader>
               <CardContent>

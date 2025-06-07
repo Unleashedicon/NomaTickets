@@ -36,7 +36,7 @@ authorize: async (credentials) => {
   return {
     id: user.id,
     name: user.name,
-    email: user.email,
+    email: user.email,// eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any; // ← OR use: as User
 }
 
@@ -52,7 +52,8 @@ authorize: async (credentials) => {
         // or from the OAuth provider (for Google).
 
         token.id = user.id; // <--- !!! CRITICAL FIX: Add user.id to the JWT token !!!
-        token.role = (user as any).role; // Add role from the initial 'user' object
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+token.role = (user as any).role; // Add role from the initial 'user' object
                                        // (assuming your User type or `authorize` returns it)
       } else if (token.email) {
         // This block runs on subsequent requests when only the token is available

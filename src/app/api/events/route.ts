@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   const fromDate = searchParams.get('fromDate'); // ISO format
   const toDate = searchParams.get('toDate');
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const filters: any = {
     status: 'APPROVED',
   };
@@ -44,8 +45,8 @@ export async function GET(req: NextRequest) {
         : false,
     },
   });
-
-  const result = events.map((event) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = events.map((event: any) => ({
     ...event,
     isBookmarked: userId ? event.bookmarkedEvents.length > 0 : false,
   }));
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
         category,
         creatorId: userId,
         ticketClasses: {
-          create: ticketClasses.map((tc: any) => ({
+          create: ticketClasses.map((tc) => ({
             name: tc.name,
             price: parseFloat(tc.price),
             quantity: parseInt(tc.quantity),

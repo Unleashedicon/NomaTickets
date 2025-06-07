@@ -9,11 +9,13 @@ import LocationMap from "@/components/locationpicker";
 import LocationAutocomplete from "@/components/locationautocomplete";
 import currencyCodes from "currency-codes";
 import { DateTimeRangePicker } from "@/components/datetimerangepicker"
-import type { DateRange } from "react-day-picker"
 import { readAndCompressImage } from 'browser-image-resizer';
 import { toast } from 'sonner';
 import "flowbite";
-
+export type DateRange = {
+  startDate: Date | null;
+  endDate: Date | null;
+};
 const imageResizeConfig = {
   quality: 0.8,
   maxWidth: 1200,
@@ -33,7 +35,6 @@ export default function EventCreatorForm() {
   const [eventTitle, setEventTitle] = useState<string>('');
   const [eventDescription, setEventDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [eventImageFile, setEventImageFile] = useState<File | null>(null);
   const [eventImagePreview, setEventImagePreview] = useState<string | null>(null);
   const [ticketClasses, setTicketClasses] = useState<{ id: number; name: string; price: string; quantity: string; currency: string}[]>([]);
   const [visibility, setVisibility] = useState<'public' | 'private'>('public');
@@ -48,7 +49,6 @@ const [startTime, setStartTime] = useState("09:00")
 const [endTime, setEndTime] = useState("17:00")
   const imageFileInputRef = useRef<HTMLInputElement>(null);
   const nextTicketId = useRef(0); // To generate unique IDs for ticket rows
-const isValidCurrency = (code: string) => currencyCodes.code(code) !== undefined;
 
   // Function to show alerts
   const showAlert = (message: string, type: typeof alertType) => {
@@ -72,7 +72,6 @@ const isValidCurrency = (code: string) => currencyCodes.code(code) !== undefined
   const file = event.target.files?.[0];
 
   if (!file) {
-    setEventImageFile(null);
     setEventImagePreview(null);
     return;
   }
@@ -80,7 +79,6 @@ const isValidCurrency = (code: string) => currencyCodes.code(code) !== undefined
   // Validate file type
   if (!file.type.startsWith('image/')) {
     showAlert('Please upload an image file (SVG, PNG, JPG, or GIF).', 'danger');
-    setEventImageFile(null);
     setEventImagePreview(null);
     if (imageFileInputRef.current) imageFileInputRef.current.value = '';
     return;
@@ -113,7 +111,6 @@ const isValidCurrency = (code: string) => currencyCodes.code(code) !== undefined
 
     if (data.secure_url) {
       console.log('✅ Uploaded to Cloudinary:', data.secure_url);
-      setEventImageFile(resizedFile);
       setEventImageCloudinaryUrl(data.secure_url); // <-- use this URL in your API later
     } else {
       throw new Error(data.error?.message || 'Cloudinary upload failed');
@@ -122,7 +119,6 @@ const isValidCurrency = (code: string) => currencyCodes.code(code) !== undefined
   } catch (error) {
     console.error('Image processing/upload failed:', error);
     showAlert('Failed to process or upload image. Please try another one.', 'danger');
-    setEventImageFile(null);
     setEventImagePreview(null);
   }
 };
@@ -181,33 +177,34 @@ if (!coordinates || coordinates.length !== 2) {
   return;
 }
 
-  if (!date?.from || !startTime) {
+  if (!date?.startDate || !startTime) {
     alert("Please select a start date and time");
     return;
   }
 
   // 2. Convert to ISO strings
-  const startDateTimeISO =
-    date?.from && startTime
-      ? new Date(
-          date.from.getFullYear(),
-          date.from.getMonth(),
-          date.from.getDate(),
-          Number(startTime.split(":")[0]),
-          Number(startTime.split(":")[1])
-        ).toISOString()
-      : null;
+ const startDateTimeISO =
+  date?.startDate && startTime
+    ? new Date(
+        date.startDate.getFullYear(),
+        date.startDate.getMonth(),
+        date.startDate.getDate(),
+        Number(startTime.split(":")[0]),
+        Number(startTime.split(":")[1])
+      ).toISOString()
+    : null;
 
-  const endDateTimeISO =
-    date?.to && endTime
-      ? new Date(
-          date.to.getFullYear(),
-          date.to.getMonth(),
-          date.to.getDate(),
-          Number(endTime.split(":")[0]),
-          Number(endTime.split(":")[1])
-        ).toISOString()
-      : null;
+const endDateTimeISO =
+  date?.endDate && endTime
+    ? new Date(
+        date.endDate.getFullYear(),
+        date.endDate.getMonth(),
+        date.endDate.getDate(),
+        Number(endTime.split(":")[0]),
+        Number(endTime.split(":")[1])
+      ).toISOString()
+    : null;
+
 
   // 3. Optional: Upload image separately and get `imageUrl`
   // For now, assume eventImageUrl is already set (from cloud upload)
@@ -264,7 +261,6 @@ setDate(undefined);
     setStartTime('');
     setEndTime('');
     setEventImageCloudinaryUrl('');
-    setEventImageFile(null);
     setEventImagePreview(null);
     if (imageFileInputRef.current) imageFileInputRef.current.value = '';
 toast.success("Event created!", {
@@ -544,7 +540,7 @@ toast.success("Event created!", {
                   </tr>
                 </thead>
 <tbody>
-  {ticketClasses.map((ticket, index) => (
+  {ticketClasses.map((ticket) => (
     <tr
       key={ticket.id}
       className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
