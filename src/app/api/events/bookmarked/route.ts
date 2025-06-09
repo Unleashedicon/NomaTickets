@@ -15,8 +15,8 @@ export async function GET(req: Request) {
       include: { event: true },
       orderBy: { createdAt: 'desc' },
     });
-
-    const events = bookmarks.map((b) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const events = bookmarks.map((b: any) => ({
       ...b.event,
       isBookmarked: true,
     }));
