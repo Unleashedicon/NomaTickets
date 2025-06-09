@@ -2,21 +2,11 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
-
-import { cn } from "@/lib/utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-export type DateRange = {
-  startDate: Date | null;
-  endDate: Date | null;
-};
-type DateTimeRangePickerProps = React.HTMLAttributes<HTMLDivElement> & {
+import { DateRangePicker, DateRange } from "@/components/ui/calendar"
+
+interface DateTimeRangePickerProps {
   date: DateRange | undefined
   setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
   startTime: string
@@ -26,7 +16,6 @@ type DateTimeRangePickerProps = React.HTMLAttributes<HTMLDivElement> & {
 }
 
 export function DateTimeRangePicker({
-  className,
   date,
   setDate,
   startTime,
@@ -36,123 +25,94 @@ export function DateTimeRangePicker({
 }: DateTimeRangePickerProps) {
   const [timeDropdownOpen, setTimeDropdownOpen] = React.useState(false)
 
-  const toggleDropdown = () => setTimeDropdownOpen(!timeDropdownOpen)
-  const closeDropdown = () => setTimeDropdownOpen(false)
-  const handleSaveTime = () => closeDropdown()
+  const toggleTimeDropdown = () => setTimeDropdownOpen((prev) => !prev)
+  const closeTimeDropdown = () => setTimeDropdownOpen(false)
+  const clearDate = () => setDate(undefined)
 
-  const formatDateRangeText = () => {
-    if (!date?.startDate) return "Pick a date range"
-    if (date.endDate) {
-      return `${format(date.startDate, "LLL dd, y")} - ${format(date.endDate, "LLL dd, y")}`
+  const formattedRange = () => {
+    if (!date?.from) return "Pick a date range"
+    if (date?.to) {
+      return `${format(date.from, "PPP")} – ${format(date.to, "PPP")}`
     }
-    return format(date.startDate, "LLL dd, y")
+    return format(date.from, "PPP")
   }
 
-return (
-  <div className={cn("flex flex-col gap-4", className)}>
-      {/* Date range picker */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            id="date"
-            variant={"outline"}
-            className={cn(
-              "w-[300px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-5 w-5" />
-            {formatDateRangeText()}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-<Calendar
-  initialFocus
-  mode="range"
-  defaultMonth={date?.startDate}
-  selected={date}
-  onSelect={setDate}
-  numberOfMonths={2}
-  modifiersClassNames={{
-    selected: "bg-blue-500 text-white",       // Start and end dates
-    range_middle: "bg-blue-100",              // 👈 This is the in-between shadow
-  }}
-/>
-        </PopoverContent>
-      </Popover>
-      
-    {/* Time picker dropdown */}
-    <div className="relative">
-      <button
-        type="button"
-        onClick={toggleDropdown}
-        className="inline-flex items-center justify-center w-[300px] rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-      >
-        Choose time
-        <svg
-          className="ml-3 h-2.5 w-2.5"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 10 6"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="m1 1 4 4 4-4"
-          />
-        </svg>
-      </button>
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Date & Time Range</CardTitle>
+      </CardHeader>
 
-      {timeDropdownOpen && (
-        <div className="z-10 mt-2 w-auto rounded-lg bg-white p-3 shadow-sm dark:bg-gray-700">
-          <div className="grid max-w-[16rem] grid-cols-2 gap-4 mb-2 mx-auto">
-            {/* Start time input */}
-            <div>
-              <label htmlFor="start-time" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                Start time:
-              </label>
-              <input
-                type="time"
-                id="start-time"
-                min="00:00"
-                max="23:59"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                required
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-              />
+      <CardContent className="space-y-4">
+        {/* Date Range Picker */}
+        <DateRangePicker
+          value={date}
+          onChange={setDate}
+          label="Event Dates"
+          placeholder="Select a date range"
+          helperText="Choose the event's start and end dates"
+        />
+
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={clearDate}>
+            Clear Dates
+          </Button>
+          <Button type="button" variant="secondary" size="sm" onClick={toggleTimeDropdown}>
+            {timeDropdownOpen ? "Hide Time Picker" : "Set Time"}
+          </Button>
+        </div>
+
+        {/* Time Range Picker */}
+        {timeDropdownOpen && (
+          <div className="rounded-lg border p-4 space-y-4 bg-muted">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="start-time" className="text-sm font-medium">
+                  Start Time
+                </label>
+                <input
+                  id="start-time"
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="end-time" className="text-sm font-medium">
+                  End Time
+                </label>
+                <input
+                  id="end-time"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 border rounded-md text-sm"
+                />
+              </div>
             </div>
 
-            {/* End time input */}
-            <div>
-              <label htmlFor="end-time" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                End time:
-              </label>
-              <input
-                type="time"
-                id="end-time"
-                min="00:00"
-                max="23:59"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                required
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-              />
+            <div className="flex justify-end">
+              <Button variant="default" size="sm" onClick={closeTimeDropdown}>
+                Done
+              </Button>
             </div>
           </div>
+        )}
 
-          <button
-            type="button"
-            onClick={handleSaveTime}
-            className="text-blue-700 dark:text-blue-500 text-sm hover:underline"
-          >
-            Save time
-          </button>
-        </div>
-      )}
-    </div>
-  </div>
-)
+        {/* Preview Summary */}
+        {date?.from && (
+          <div className="p-3 rounded-md bg-muted text-sm">
+            <p>
+              <span className="font-medium">Date:</span> {formattedRange()}
+            </p>
+            <p>
+              <span className="font-medium">Time:</span>{" "}
+              {startTime || "--:--"} to {endTime || "--:--"}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
 }

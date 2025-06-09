@@ -42,16 +42,20 @@ const formatPrice = () => {
   const priorities = ['regular', 'vip', 'vvip'];
 
   if (event.ticketClasses && event.ticketClasses.length > 0) {
-    for (const tier of priorities) {
-      const found = event.ticketClasses.find(tc => tc.name.toLowerCase() === tier && tc.price >= 0);
-      if (found) {
-        return found.price === 0 ? 'Free' : `$${found.price.toFixed(2)}`;
-      }
+for (const tier of priorities) {
+  const tc = event.ticketClasses.find(
+    tc => tc.name.toLowerCase() === tier && tc.price >= 0
+  );
+  if (tc) {
+    const currency = tc.currency ?? '$';
+    return tc.price === 0 ? 'Free' : `${currency}${tc.price.toFixed(2)}`;
+  }
     }
 
     // Fallback: use first available ticket class
     const fallback = event.ticketClasses[0];
-    return fallback.price === 0 ? 'Free' : `$${fallback.price.toFixed(2)}`;
+    const currency = fallback.currency ?? '$';
+    return fallback.price === 0 ? 'Free' : `${currency}${fallback.price.toFixed(2)}`;
   }
 
   // Final fallback to event-level price
@@ -59,6 +63,7 @@ const formatPrice = () => {
   if (event.price === undefined || event.price === null) return 'TBA';
   return `$${event.price.toFixed(2)}`;
 };
+
 
  const getCategoryColor = (category?: string) => {
   switch (category?.toLowerCase()) {
@@ -190,21 +195,20 @@ const formatPrice = () => {
           </p>
         )}
 
-        {/* Price and Book Button */}
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-[#111827]">
-            {formatPrice()}
-          </div>
-          <Button 
-            className={`px-6 ${
-              event.soldOut 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-[#1D4ED8] hover:bg-blue-700'
-            } text-white rounded-lg transition-all`}
-            disabled={event.soldOut}
-          >
-            {event.soldOut ? 'Sold Out' : 'Book Now'}
-          </Button>
+ <div className="mt-auto pt-4 border-t border-gray-200 flex items-center justify-between">
+    <div className="text-2xl font-bold text-[#111827]">
+      {formatPrice()}
+    </div>
+    <Button 
+      className={`px-6 ${
+        event.soldOut 
+          ? 'bg-gray-400 cursor-not-allowed' 
+          : 'bg-[#1D4ED8] hover:bg-blue-700'
+      } text-white rounded-lg transition-all`}
+      disabled={event.soldOut}
+    >
+      {event.soldOut ? 'Sold Out' : 'Book Now'}
+    </Button>
         </div>
       </CardContent>
     </Card>

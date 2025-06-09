@@ -12,10 +12,8 @@ import { DateTimeRangePicker } from "@/components/datetimerangepicker"
 import { readAndCompressImage } from 'browser-image-resizer';
 import { toast } from 'sonner';
 import "flowbite";
-export type DateRange = {
-  startDate: Date | null;
-  endDate: Date | null;
-};
+import { DateRange } from "@/components/ui/calendar"
+
 const imageResizeConfig = {
   quality: 0.8,
   maxWidth: 1200,
@@ -176,30 +174,29 @@ if (!coordinates || coordinates.length !== 2) {
   showAlert("Please select a valid event location.", "danger");
   return;
 }
+if (!date?.from || !startTime) {
+  alert("Please select a start date and time");
+  return;
+}
 
-  if (!date?.startDate || !startTime) {
-    alert("Please select a start date and time");
-    return;
-  }
 
-  // 2. Convert to ISO strings
- const startDateTimeISO =
-  date?.startDate && startTime
+const startDateTimeISO =
+  date?.from && startTime
     ? new Date(
-        date.startDate.getFullYear(),
-        date.startDate.getMonth(),
-        date.startDate.getDate(),
+        date.from.getFullYear(),
+        date.from.getMonth(),
+        date.from.getDate(),
         Number(startTime.split(":")[0]),
         Number(startTime.split(":")[1])
       ).toISOString()
     : null;
 
 const endDateTimeISO =
-  date?.endDate && endTime
+  date?.to && endTime
     ? new Date(
-        date.endDate.getFullYear(),
-        date.endDate.getMonth(),
-        date.endDate.getDate(),
+        date.to.getFullYear(),
+        date.to.getMonth(),
+        date.to.getDate(),
         Number(endTime.split(":")[0]),
         Number(endTime.split(":")[1])
       ).toISOString()
@@ -526,95 +523,102 @@ toast.success("Event created!", {
       </div>
     </div>
           {/* Ticket Classes */}
-          <div className="space-y-2">
-            <Label>Ticket Classes</Label>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                  <tr>
-                    <th scope="col" className="px-6 py-3">Name</th>
-                    <th scope="col" className="px-6 py-3">Currency</th>
-                    <th scope="col" className="px-6 py-3">Price</th>
-                    <th scope="col" className="px-6 py-3">Quantity</th>
-                    <th scope="col" className="px-6 py-3"></th> {/* For remove button */}
-                  </tr>
-                </thead>
-<tbody>
-  {ticketClasses.map((ticket) => (
-    <tr
-      key={ticket.id}
-      className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-    >
-      <td className="px-6 py-4">
-        <Input
-          type="text"
-          placeholder="Standard"
-          value={ticket.name}
-          onChange={(e) => handleTicketClassChange(ticket.id, "name", e.target.value)}
-          className="w-full text-sm"
-          required
-        />
-      </td>
-      <td className="px-6 py-4">
-        <Input
-          type="text"
-          placeholder="USD"
-          value={ticket.currency}
-          onChange={(e) => handleTicketClassChange(ticket.id, "currency", e.target.value.toUpperCase())}
-          className={`w-full text-sm ${
-            ticket.currency && !currencyCodes.code(ticket.currency)
-              ? "border-red-500"
-              : ""
-          }`}
-          maxLength={3}
-          required
-        />
-        {/* Optional error feedback */}
-        {ticket.currency && !currencyCodes.code(ticket.currency) && (
-          <p className="text-xs text-red-500 mt-1">Invalid currency code</p>
-        )}
-      </td>
-      <td className="px-6 py-4">
-        <Input
-          type="number"
-          placeholder="0.00"
-          value={ticket.price}
-          onChange={(e) => handleTicketClassChange(ticket.id, "price", e.target.value)}
-          className="w-full text-sm"
-          step="0.01"
-          min="0"
-          required
-        />
-      </td>
-      <td className="px-6 py-4">
-        <Input
-          type="number"
-          placeholder="100"
-          value={ticket.quantity}
-          onChange={(e) => handleTicketClassChange(ticket.id, "quantity", e.target.value)}
-          className="w-full text-sm"
-          min="1"
-          required
-        />
-      </td>
-      <td className="px-6 py-4 text-right">
-        {ticketClasses.length > 1 && (
-          <Button
-            type="button"
-            onClick={() => removeTicketClass(ticket.id)}
-            variant="ghost"
-            size="sm"
-            className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20"
-          >
-            Remove
-          </Button>
-        )}
-      </td>
-    </tr>
-  ))}
-</tbody>
+    <div className="space-y-2">
+  <Label>Ticket Classes</Label>
 
-              </table>
+  <div className="overflow-x-auto">
+    <div className="min-w-full space-y-2">
+      {/* Table header */}
+      <div className="hidden md:grid grid-cols-5 text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 px-4 py-2 rounded-t-md">
+        <div>Name</div>
+        <div>Currency</div>
+        <div>Price</div>
+        <div>Quantity</div>
+        <div></div>
+      </div>
+
+      {/* Ticket rows */}
+      {ticketClasses.map((ticket) => (
+        <div
+          key={ticket.id}
+          className="grid grid-cols-1 md:grid-cols-5 gap-2 items-start bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md px-4 py-3"
+        >
+          <div>
+            <Label className="md:hidden">Name</Label>
+            <Input
+              type="text"
+              placeholder="Standard"
+              value={ticket.name}
+              onChange={(e) => handleTicketClassChange(ticket.id, "name", e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <Label className="md:hidden">Currency</Label>
+            <Input
+              type="text"
+              placeholder="USD"
+              value={ticket.currency}
+              onChange={(e) =>
+                handleTicketClassChange(ticket.id, "currency", e.target.value.toUpperCase())
+              }
+              className={`${
+                ticket.currency && !currencyCodes.code(ticket.currency)
+                  ? "border-red-500"
+                  : ""
+              }`}
+              maxLength={3}
+              required
+            />
+            {ticket.currency && !currencyCodes.code(ticket.currency) && (
+              <p className="text-xs text-red-500 mt-1">Invalid currency code</p>
+            )}
+          </div>
+
+          <div>
+            <Label className="md:hidden">Price</Label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={ticket.price}
+              onChange={(e) => handleTicketClassChange(ticket.id, "price", e.target.value)}
+              step="0.01"
+              min="0"
+              required
+            />
+          </div>
+
+          <div>
+            <Label className="md:hidden">Quantity</Label>
+            <Input
+              type="number"
+              placeholder="100"
+              value={ticket.quantity}
+              onChange={(e) => handleTicketClassChange(ticket.id, "quantity", e.target.value)}
+              min="1"
+              required
+            />
+          </div>
+
+          <div className="flex md:justify-end items-center pt-1">
+            {ticketClasses.length > 1 && (
+              <Button
+                type="button"
+                onClick={() => removeTicketClass(ticket.id)}
+                variant="ghost"
+                size="sm"
+                className="text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20"
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+
+
             </div>
             <Button type="button" onClick={addTicketClass} variant="outline" className="mt-2 w-full sm:w-auto">
               + Add Ticket Class
