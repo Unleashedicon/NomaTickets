@@ -113,15 +113,6 @@ async function loadUserEvents(userId: string, userRole: string) {
     router.push("/");
   }
 } 
- useEffect(() => {
-    const user = session?.user;
-
-    if (user) {
-
-      // ✅ Load events only once when session becomes available
-      loadUserEvents(user.id, user.role);
-    }
-  }, [session?.user]);
 if (isLoading) {
   return (
     <div className="flex justify-center items-center min-h-screen">
