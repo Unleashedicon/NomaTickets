@@ -9,12 +9,10 @@ import { useRouter } from 'next/navigation'
 import EventsList from '@/components/EventsList';
 import { Event } from '@/components/EventCard';
 import EventDetailsModal from '@/components/EventModal';
-import { useUser } from "@/context/useContext";
 
 export default function AuthTabs() {
   const [tab, setTab] = useState("login");
-  const { user, isLoading } = useUser();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
     const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [bookmarkedEvents, setBookmarkedEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -34,24 +32,37 @@ const router = useRouter();
     if (!res.ok) throw new Error('Failed to fetch bookmarked events');
     return res.json();
   }
-async function loadUserEvents(userId: string, userRole: string) {
-  if (userRole === "CREATOR") {
-    try {
-      const created = await fetchCreatedEvents(userId);
-      setCreatedEvents(created);
-    } catch (error) {
-      console.error("Error fetching created events:", error);
+
+useEffect(() => {
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
+
+  if (!userId) return;
+
+  const fetchData = async () => {
+    let role = userRole;
+
+    // Fallback if role is not in session
+    if (!role) {
+      const res = await fetch(`/api/user/role?userId=${userId}`);
+      const data = await res.json();
+      if (res.ok) {
+        role = data.role;
+      } else {
+        console.error("Failed to fetch user role:", data.error);
+        return;
+      }
     }
-  }
 
-  try {
-    const bookmarked = await fetchBookmarkedEvents(userId);
-    setBookmarkedEvents(bookmarked);
-  } catch (error) {
-    console.error("Error fetching bookmarked events:", error);
-  }
-}
+    if (role === "CREATOR") {
+      fetchCreatedEvents(userId).then(setCreatedEvents);
+    }
 
+    fetchBookmarkedEvents(userId).then(setBookmarkedEvents);
+  };
+
+  fetchData();
+}, [session?.user?.id, session?.user?.role]);
 
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -88,39 +99,33 @@ async function loadUserEvents(userId: string, userRole: string) {
   };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  const form = new FormData(e.currentTarget);
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
 
-  const email = form.get("email")?.toString() || "";
-  const password = form.get("password")?.toString() || "";
+    const email = form.get("email")?.toString() || "";
+    const password = form.get("password")?.toString() || "";
 
-  const res = await signIn("credentials", {
-    email,
-    password,
-    redirect: false,
-  });
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-  if (res?.error) {
-    alert(res.error);
-  } else {
-
-    if (user) {
-      await loadUserEvents(user.id, user.role); // fetch events
+    if (res?.error) {
+      alert(res.error);
+    } else {
+      alert("Login successful");
+        router.push("/");
     }
-
-    alert("Login successful");
-    router.push("/");
+  };
+  if (status === 'loading') {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Loading profile...</p>
+      </div>
+    );
   }
-} 
-if (isLoading) {
-  return (
-    <div className="flex justify-center items-center min-h-screen">
-      <p>Loading profile...</p>
-    </div>
-  );
-}
-
-if (user) {
+  if (session) {
     return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -128,10 +133,10 @@ if (user) {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="text-3xl font-bold">
-              Welcome back, {user?.name ?? user?.email}! 👋
+              Welcome back, {session.user?.name ?? session.user?.email}! 👋
             </CardTitle>
             <p className="text-muted-foreground">
-              {user?.role === 'CREATOR'
+              {session.user?.role === 'CREATOR'
                 ? 'Manage your events and see what you’ve bookmarked.'
                 : 'Explore your bookmarked events and discover new ones.'}
             </p>
@@ -141,13 +146,13 @@ if (user) {
         {/* Events Tabs */}
         <Tabs defaultValue="bookmarked" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            {user?.role === 'CREATOR' && (
+            {session.user?.role === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
             )}
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {user?.role === 'CREATOR' && (
+          {session.user?.role === 'CREATOR' && (
             <TabsContent value="created" className="mt-6">
               <Card>
                 <CardHeader>
