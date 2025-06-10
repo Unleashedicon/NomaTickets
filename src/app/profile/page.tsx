@@ -34,6 +34,7 @@ const router = useRouter();
   }
 useEffect(() => {
   const userId = session?.user?.id;
+  // @ts-ignore
   const userRole = session?.user?.role;
 
   if (!userId || !userRole) return;
