@@ -50,28 +50,28 @@ useEffect(() => {
   };
 
   const loadEvents = async (role: string | null) => {
-    if (role === 'CREATOR') {
+    if (role === "CREATOR") {
       try {
         const created = await fetchCreatedEvents(userId);
         setCreatedEvents(created);
       } catch (error) {
-        console.error('Failed to fetch created events:', error);
+        console.error("Failed to fetch created events:", error);
       }
     }
     try {
       const bookmarked = await fetchBookmarkedEvents(userId);
       setBookmarkedEvents(bookmarked);
     } catch (error) {
-      console.error('Failed to fetch bookmarked events:', error);
+      console.error("Failed to fetch bookmarked events:", error);
     }
   };
 
   (async () => {
-    // Use role from session if available, else fetch
-    const role = session?.user?.role ?? (await fetchUserRole());
+    const role = await fetchUserRole();
     await loadEvents(role);
   })();
-}, [session?.user?.id, session?.user?.role]);
+}, [session?.user?.id]);
+
 
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
