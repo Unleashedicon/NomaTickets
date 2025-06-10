@@ -163,7 +163,7 @@ useEffect(() => {
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {session.user?.role === 'CREATOR' && (
+          {userRole === 'CREATOR' && (
             <TabsContent value="created" className="mt-6">
               <Card>
                 <CardHeader>
