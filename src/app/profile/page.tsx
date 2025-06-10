@@ -103,7 +103,6 @@ async function loadUserEvents(userId: string, userRole: string) {
   if (res?.error) {
     alert(res.error);
   } else {
-    const user = session?.user;
 
     if (user) {
       await loadUserEvents(user.id, user.role); // fetch events
