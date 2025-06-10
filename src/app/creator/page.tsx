@@ -5,13 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import LocationMap from "@/components/locationpicker";
+import LocationMapWrapper from "@/components/LocationMapWrapper";
 import LocationAutocomplete from "@/components/locationautocomplete";
 import currencyCodes from "currency-codes";
 import { DateTimeRangePicker } from "@/components/datetimerangepicker"
-import { readAndCompressImage } from 'browser-image-resizer';
+import imageCompression from 'browser-image-compression';
 import { toast } from 'sonner';
-import "flowbite";
 import { DateRange } from "@/components/ui/calendar"
 
 const imageResizeConfig = {
@@ -65,7 +64,8 @@ const [endTime, setEndTime] = useState("17:00")
   }, []);
 
 
- const handleImageFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+
+const handleImageFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
   setAlertMessage(null);
   const file = event.target.files?.[0];
 
@@ -75,48 +75,55 @@ const [endTime, setEndTime] = useState("17:00")
   }
 
   // Validate file type
-  if (!file.type.startsWith('image/')) {
-    showAlert('Please upload an image file (SVG, PNG, JPG, or GIF).', 'danger');
+  if (!file.type.startsWith("image/")) {
+    showAlert("Please upload an image file (SVG, PNG, JPG, or GIF).", "danger");
     setEventImagePreview(null);
-    if (imageFileInputRef.current) imageFileInputRef.current.value = '';
+    if (imageFileInputRef.current) imageFileInputRef.current.value = "";
     return;
   }
 
   try {
-    // Resize image (if you're using something like browser-image-compression)
-    const resizedBlob = await readAndCompressImage(file, imageResizeConfig);
-    const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+    // Compress image with browser-image-compression
+    const options = {
+  maxWidthOrHeight: 1200,
+  initialQuality: 0.8,
+  useWebWorker: true,
+
+    };
+    const compressedFile = await imageCompression(file, options);
 
     // Preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setEventImagePreview(reader.result as string);
     };
-    reader.readAsDataURL(resizedFile);
+    reader.readAsDataURL(compressedFile);
 
     // Upload to Cloudinary (unsigned)
     const formData = new FormData();
-    formData.append('file', resizedFile);
-    formData.append('upload_preset', 'nomatickets'); // your unsigned preset name
-    formData.append('folder', 'samples/ecommerce');  // folder set in the preset
+    formData.append("file", compressedFile);
+    formData.append("upload_preset", "nomatickets");
+    formData.append("folder", "samples/ecommerce");
 
-    const res = await fetch('https://api.cloudinary.com/v1_1/dqvxxikdb/image/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dqvxxikdb/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     const data = await res.json();
 
     if (data.secure_url) {
-      console.log('✅ Uploaded to Cloudinary:', data.secure_url);
-      setEventImageCloudinaryUrl(data.secure_url); // <-- use this URL in your API later
+      console.log("✅ Uploaded to Cloudinary:", data.secure_url);
+      setEventImageCloudinaryUrl(data.secure_url);
     } else {
-      throw new Error(data.error?.message || 'Cloudinary upload failed');
+      throw new Error(data.error?.message || "Cloudinary upload failed");
     }
-
   } catch (error) {
-    console.error('Image processing/upload failed:', error);
-    showAlert('Failed to process or upload image. Please try another one.', 'danger');
+    console.error("Image processing/upload failed:", error);
+    showAlert("Failed to process or upload image. Please try another one.", "danger");
     setEventImagePreview(null);
   }
 };
@@ -518,7 +525,7 @@ toast.success("Event created!", {
     />
     <div className="w-full h-40 overflow-hidden rounded-lg border border-gray-300">
 
-        <LocationMap lat={coordinates[0]} lng={coordinates[1]} label={eventLocation || "Selected location"} />
+        <LocationMapWrapper lat={coordinates[0]} lng={coordinates[1]} label={eventLocation || "Selected location"} />
       </div>
       </div>
     </div>

@@ -9,6 +9,11 @@ type Props = {
   lng: number;
   label?: string;
 };
+// Prevent 'self' undefined error during SSR by defining global 'self' as 'globalThis'
+if (typeof self === "undefined") {
+// @ts-expect-error: Leaflet library uses window which is undefined during SSR
+  global.self = global;
+}
 
 function FlyTo({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();

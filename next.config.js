@@ -1,18 +1,34 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    config.externals.push("pino-pretty", "lokijs", "encoding");
+  webpack: (
+    config,
+    { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
+  ) => {
+    // Prevent bundling of Node.js core modules for the client
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+
+    // Exclude server-only packages from client bundles
+    config.externals = [
+      ...(config.externals || []),
+      "pino-pretty",
+      "lokijs",
+      "encoding",
+    ];
+
     return config;
   },
-    typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
-    ignoreBuildErrors: true,
+
+  // Allow builds with TS errors in specific environments
+  typescript: {
+    ignoreBuildErrors: process.env.SKIP_TYPECHECK === "true",
   },
+
+  reactStrictMode: true, // Recommended for catching subtle bugs
 };
 
 module.exports = nextConfig;
