@@ -43,50 +43,45 @@ const router = useRouter();
     return data.role;
   }
 
- useEffect(() => {
-  if (status !== "authenticated" || !session?.user?.id) {
-    setRole(null);
-    setCreatedEvents([]);
-    setBookmarkedEvents([]);
-    return;
-  }
+  async function loadDataForTab(selectedTab: string) {
+    if (status !== "authenticated" || !session?.user?.id) {
+      setRole(null);
+      setCreatedEvents([]);
+      setBookmarkedEvents([]);
+      return;
+    }
 
-  let isCancelled = false;
-
-  async function loadUserData() {
     try {
-      // session is non-null here because of the earlier guard check
-      const userId = session!.user!.id;
+      const userId = session.user.id;
 
+      // Always fetch role once per tab switch
       const fetchedRole = await fetchUserRole(userId);
-      if (isCancelled) return;
-
       setRole(fetchedRole);
 
-      if (fetchedRole === "CREATOR") {
+      if (selectedTab === "created" && fetchedRole === "CREATOR") {
         const created = await fetchCreatedEvents(userId);
-        if (!isCancelled) setCreatedEvents(created);
+        setCreatedEvents(created);
+      } else if (selectedTab === "bookmarked") {
+        const bookmarked = await fetchBookmarkedEvents(userId);
+        setBookmarkedEvents(bookmarked);
       }
-      const bookmarked = await fetchBookmarkedEvents(userId);
-      if (!isCancelled) setBookmarkedEvents(bookmarked);
-
     } catch (error) {
-      if (!isCancelled) {
-        console.error(error);
-        setRole(null);
-        setCreatedEvents([]);
-        setBookmarkedEvents([]);
-      }
+      console.error(error);
+      setRole(null);
+      setCreatedEvents([]);
+      setBookmarkedEvents([]);
     }
   }
 
-  loadUserData();
-
-  return () => {
-    isCancelled = true;
-  };
-}, [status, session]);
-
+  // Call loadDataForTab whenever the tab changes AND user is logged in
+const handleTabChange = async (value: string) => {
+  setTab(value);
+  try {
+    await loadDataForTab(value);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -167,7 +162,7 @@ const router = useRouter();
         </Card>
 
         {/* Events Tabs */}
-        <Tabs defaultValue="bookmarked" className="w-full">
+        <Tabs defaultValue="bookmarked" className="w-full" value={tab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
             {role === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
