@@ -16,13 +16,11 @@ export default function AuthTabs() {
     const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [bookmarkedEvents, setBookmarkedEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [role, setRole] = useState<string | null>(null); // New role state
 
 const router = useRouter();
-   const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
   };
-
   async function fetchCreatedEvents(userId: string) {
     const res = await fetch(`/api/events/created?userId=${userId}`);
     if (!res.ok) throw new Error('Failed to fetch created events');
@@ -35,53 +33,15 @@ const router = useRouter();
     return res.json();
   }
 
-  // New function to fetch role from API
-  async function fetchUserRole(userId: string) {
-    const res = await fetch(`/api/user/role?userId=${userId}`);
-    if (!res.ok) throw new Error('Failed to fetch user role');
-    const data = await res.json();
-    return data.role;
-  }
+  useEffect(() => {
+    if (!session?.user?.id) return;
 
-  async function loadDataForTab(selectedTab: string) {
-    if (status !== "authenticated" || !session?.user?.id) {
-      setRole(null);
-      setCreatedEvents([]);
-      setBookmarkedEvents([]);
-      return;
+    if (session.user.role === 'CREATOR') {
+      fetchCreatedEvents(session.user.id).then(setCreatedEvents);
     }
 
-    try {
-      const userId = session.user.id;
-
-      // Always fetch role once per tab switch
-      const fetchedRole = await fetchUserRole(userId);
-      setRole(fetchedRole);
-
-      if (selectedTab === "created" && fetchedRole === "CREATOR") {
-        const created = await fetchCreatedEvents(userId);
-        setCreatedEvents(created);
-      } else if (selectedTab === "bookmarked") {
-        const bookmarked = await fetchBookmarkedEvents(userId);
-        setBookmarkedEvents(bookmarked);
-      }
-    } catch (error) {
-      console.error(error);
-      setRole(null);
-      setCreatedEvents([]);
-      setBookmarkedEvents([]);
-    }
-  }
-
-  // Call loadDataForTab whenever the tab changes AND user is logged in
-const handleTabChange = async (value: string) => {
-  setTab(value);
-  try {
-    await loadDataForTab(value);
-  } catch (error) {
-    console.error(error);
-  }
-};
+    fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
+  }, [session?.user?.id]);
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -154,7 +114,7 @@ const handleTabChange = async (value: string) => {
               Welcome back, {session.user?.name ?? session.user?.email}! 👋
             </CardTitle>
             <p className="text-muted-foreground">
-              {role === 'CREATOR'
+              {session.user?.role === 'CREATOR'
                 ? 'Manage your events and see what you’ve bookmarked.'
                 : 'Explore your bookmarked events and discover new ones.'}
             </p>
@@ -162,15 +122,15 @@ const handleTabChange = async (value: string) => {
         </Card>
 
         {/* Events Tabs */}
-        <Tabs defaultValue="bookmarked" className="w-full" value={tab} onValueChange={handleTabChange}>
+        <Tabs defaultValue="bookmarked" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            {role === 'CREATOR' && (
+            {session.user?.role === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
             )}
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {role === 'CREATOR' && (
+          {session.user?.role === 'CREATOR' && (
             <TabsContent value="created" className="mt-6">
               <Card>
                 <CardHeader>
