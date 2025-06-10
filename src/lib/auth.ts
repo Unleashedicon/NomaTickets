@@ -36,7 +36,9 @@ authorize: async (credentials) => {
   return {
     id: user.id,
     name: user.name,
-    email: user.email,// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    email: user.email,
+    role: user.role
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any; // ← OR use: as User
 }
 

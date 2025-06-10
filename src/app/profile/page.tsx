@@ -16,7 +16,6 @@ export default function AuthTabs() {
     const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [bookmarkedEvents, setBookmarkedEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-const [userRole, setUserRole] = useState<string | null>(null);
 
 const router = useRouter();
   const handleEventClick = (event: Event) => {
@@ -34,47 +33,15 @@ const router = useRouter();
     return res.json();
   }
 
-useEffect(() => {
-  const userId = session?.user?.id;
-  if (!userId) return;
+  useEffect(() => {
+    if (!session?.user?.id) return;
 
-  const fetchUserRole = async (): Promise<string | null> => {
-    try {
-      const res = await fetch(`/api/user/role?userId=${userId}`);
-      if (!res.ok) throw new Error('Failed to fetch user role');
-      const data = await res.json();
-      return data.role || null;
-    } catch (error) {
-      console.error(error);
-      return null;
+    if (session.user.role === 'CREATOR') {
+      fetchCreatedEvents(session.user.id).then(setCreatedEvents);
     }
-  };
 
-  const loadEvents = async (role: string | null) => {
-    if (role === "CREATOR") {
-      try {
-        const created = await fetchCreatedEvents(userId);
-        setCreatedEvents(created);
-      } catch (error) {
-        console.error("Failed to fetch created events:", error);
-      }
-    }
-    try {
-      const bookmarked = await fetchBookmarkedEvents(userId);
-      setBookmarkedEvents(bookmarked);
-    } catch (error) {
-      console.error("Failed to fetch bookmarked events:", error);
-    }
-  };
-
-  (async () => {
-    const role = await fetchUserRole();
-    setUserRole(role);
-    await loadEvents(role);
-  })();
-}, [session?.user?.id]);
-
-
+    fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
+  }, [session?.user?.id]);
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -147,7 +114,7 @@ useEffect(() => {
               Welcome back, {session.user?.name ?? session.user?.email}! 👋
             </CardTitle>
             <p className="text-muted-foreground">
-              {userRole === 'CREATOR'
+              {session.user?.role === 'CREATOR'
                 ? 'Manage your events and see what you’ve bookmarked.'
                 : 'Explore your bookmarked events and discover new ones.'}
             </p>
@@ -157,13 +124,13 @@ useEffect(() => {
         {/* Events Tabs */}
         <Tabs defaultValue="bookmarked" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            {userRole === 'CREATOR' && (
+            {session.user?.role === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
             )}
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {userRole === 'CREATOR' && (
+          {session.user?.role === 'CREATOR' && (
             <TabsContent value="created" className="mt-6">
               <Card>
                 <CardHeader>
