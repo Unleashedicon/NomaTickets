@@ -43,29 +43,49 @@ const router = useRouter();
     return data.role;
   }
 
-  useEffect(() => {
-    if (status !== "authenticated" || !session?.user?.id) {
-      // Not logged in or no user ID - reset role and skip
-      setRole(null);
-      return;
-    }
+ useEffect(() => {
+  if (status !== "authenticated" || !session?.user?.id) {
+    setRole(null);
+    setCreatedEvents([]);
+    setBookmarkedEvents([]);
+    return;
+  }
 
-    // Fetch user role from API and set it
-    fetchUserRole(session.user.id)
-      .then(fetchedRole => {
-        setRole(fetchedRole);
+  let isCancelled = false;
 
-        // Fetch events based on role
-        if (fetchedRole === "CREATOR") {
-          fetchCreatedEvents(session.user.id).then(setCreatedEvents);
-        }
-        fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
-      })
-      .catch(err => {
-        console.error(err);
+  async function loadUserData() {
+    try {
+      // session is non-null here because of the earlier guard check
+      const userId = session!.user!.id;
+
+      const fetchedRole = await fetchUserRole(userId);
+      if (isCancelled) return;
+
+      setRole(fetchedRole);
+
+      if (fetchedRole === "CREATOR") {
+        const created = await fetchCreatedEvents(userId);
+        if (!isCancelled) setCreatedEvents(created);
+      }
+      const bookmarked = await fetchBookmarkedEvents(userId);
+      if (!isCancelled) setBookmarkedEvents(bookmarked);
+
+    } catch (error) {
+      if (!isCancelled) {
+        console.error(error);
         setRole(null);
-      });
-  }, [status, session?.user?.id]);
+        setCreatedEvents([]);
+        setBookmarkedEvents([]);
+      }
+    }
+  }
+
+  loadUserData();
+
+  return () => {
+    isCancelled = true;
+  };
+}, [status, session]);
 
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
