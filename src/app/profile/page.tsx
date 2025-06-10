@@ -36,7 +36,7 @@ const router = useRouter();
   useEffect(() => {
     if (!session?.user?.id) return;
 
-    if (session.user.role === 'CREATOR') {
+    if (session?.user?.role === 'CREATOR') {
       fetchCreatedEvents(session.user.id).then(setCreatedEvents);
     }
 console.log("Session in client:", session?.user);
@@ -115,7 +115,7 @@ console.log("Session in client:", session?.user);
               Welcome back, {session.user?.name ?? session.user?.email}! 👋
             </CardTitle>
             <p className="text-muted-foreground">
-              {session.user?.role === 'CREATOR'
+              {session?.user?.role === 'CREATOR'
                 ? 'Manage your events and see what you’ve bookmarked.'
                 : 'Explore your bookmarked events and discover new ones.'}
             </p>
@@ -125,13 +125,13 @@ console.log("Session in client:", session?.user);
         {/* Events Tabs */}
         <Tabs defaultValue="bookmarked" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            {session.user?.role === 'CREATOR' && (
+            {session?.user?.role === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
             )}
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {session.user?.role === 'CREATOR' && (
+          {session?.user?.role === 'CREATOR' && (
             <TabsContent value="created" className="mt-6">
               <Card>
                 <CardHeader>
