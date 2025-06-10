@@ -31,6 +31,7 @@ authorize: async (credentials) => {
 
   const isValid = await compare(password, user.password);
   if (!isValid) return null;
+console.log("Returned from authorize:", user.role);
 
   // Return only id, name, email — cast to User to suppress TS error
   return {
@@ -56,7 +57,8 @@ authorize: async (credentials) => {
         token.id = user.id; // <--- !!! CRITICAL FIX: Add user.id to the JWT token !!!
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
 token.role = (user as any).role; // Add role from the initial 'user' object
-                                       // (assuming your User type or `authorize` returns it)
+                    console.log("JWT created. Role is:", token.role); // ✅
+                     // (assuming your User type or `authorize` returns it)
       } else if (token.email) {
         // This block runs on subsequent requests when only the token is available
         // (i.e., not an initial sign-in, but a session refresh/check).
@@ -77,6 +79,7 @@ token.role = (user as any).role; // Add role from the initial 'user' object
 async session({ session, token }) {
   if (session.user && token) {
     session.user.role = token.role as UserRole;
+    console.log("Session populated:", session.user);
     session.user.id = token.id as string;  // <--- add this line to expose user id in session
   }
   return session;

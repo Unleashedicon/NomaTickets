@@ -39,6 +39,7 @@ const router = useRouter();
     if (session.user.role === 'CREATOR') {
       fetchCreatedEvents(session.user.id).then(setCreatedEvents);
     }
+console.log("Session in client:", session?.user);
 
     fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
   }, [session?.user?.id]);
