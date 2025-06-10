@@ -32,16 +32,19 @@ const router = useRouter();
     if (!res.ok) throw new Error('Failed to fetch bookmarked events');
     return res.json();
   }
+useEffect(() => {
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
-  useEffect(() => {
-    if (!session?.user?.id) return;
+  if (!userId || !userRole) return;
 
-    if (session.user.role === 'CREATOR') {
-      fetchCreatedEvents(session.user.id).then(setCreatedEvents);
-    }
+  if (userRole === 'CREATOR') {
+    fetchCreatedEvents(userId).then(setCreatedEvents);
+  }
 
-    fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
-  }, [session?.user?.id]);
+  fetchBookmarkedEvents(userId).then(setBookmarkedEvents);
+}, [session?.user?.id, session?.user?.role]);
+
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
