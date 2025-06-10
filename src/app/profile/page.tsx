@@ -16,11 +16,13 @@ export default function AuthTabs() {
     const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [bookmarkedEvents, setBookmarkedEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [role, setRole] = useState<string | null>(null); // New role state
 
 const router = useRouter();
-  const handleEventClick = (event: Event) => {
+   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
   };
+
   async function fetchCreatedEvents(userId: string) {
     const res = await fetch(`/api/events/created?userId=${userId}`);
     if (!res.ok) throw new Error('Failed to fetch created events');
@@ -33,18 +35,37 @@ const router = useRouter();
     return res.json();
   }
 
-useEffect(() => {
-  if (status !== "authenticated" || !session?.user?.id) {
-    // User not authenticated or user ID missing — skip fetching events
-    return;
+  // New function to fetch role from API
+  async function fetchUserRole(userId: string) {
+    const res = await fetch(`/api/user/role?userId=${userId}`);
+    if (!res.ok) throw new Error('Failed to fetch user role');
+    const data = await res.json();
+    return data.role;
   }
 
-  if (session.user.role === "CREATOR") {
-    fetchCreatedEvents(session.user.id).then(setCreatedEvents);
-  }
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user?.id) {
+      // Not logged in or no user ID - reset role and skip
+      setRole(null);
+      return;
+    }
 
-  fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
-}, [status, session?.user?.id, session?.user?.role]);
+    // Fetch user role from API and set it
+    fetchUserRole(session.user.id)
+      .then(fetchedRole => {
+        setRole(fetchedRole);
+
+        // Fetch events based on role
+        if (fetchedRole === "CREATOR") {
+          fetchCreatedEvents(session.user.id).then(setCreatedEvents);
+        }
+        fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
+      })
+      .catch(err => {
+        console.error(err);
+        setRole(null);
+      });
+  }, [status, session?.user?.id]);
 
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -118,7 +139,7 @@ useEffect(() => {
               Welcome back, {session.user?.name ?? session.user?.email}! 👋
             </CardTitle>
             <p className="text-muted-foreground">
-              {session?.user?.role === 'CREATOR'
+              {role === 'CREATOR'
                 ? 'Manage your events and see what you’ve bookmarked.'
                 : 'Explore your bookmarked events and discover new ones.'}
             </p>
@@ -128,13 +149,13 @@ useEffect(() => {
         {/* Events Tabs */}
         <Tabs defaultValue="bookmarked" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            {session?.user?.role === 'CREATOR' && (
+            {role === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
             )}
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {session?.user?.role === 'CREATOR' && (
+          {role === 'CREATOR' && (
             <TabsContent value="created" className="mt-6">
               <Card>
                 <CardHeader>
