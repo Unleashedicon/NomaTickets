@@ -33,16 +33,19 @@ const router = useRouter();
     return res.json();
   }
 
-  useEffect(() => {
-    if (!session?.user?.id) return;
+useEffect(() => {
+  if (status !== "authenticated" || !session?.user?.id) {
+    // User not authenticated or user ID missing — skip fetching events
+    return;
+  }
 
-    if (session?.user?.role === 'CREATOR') {
-      fetchCreatedEvents(session.user.id).then(setCreatedEvents);
-    }
-console.log("Session in client:", session?.user);
+  if (session.user.role === "CREATOR") {
+    fetchCreatedEvents(session.user.id).then(setCreatedEvents);
+  }
 
-    fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
-  }, [session?.user?.id]);
+  fetchBookmarkedEvents(session.user.id).then(setBookmarkedEvents);
+}, [status, session?.user?.id, session?.user?.role]);
+
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
