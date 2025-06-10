@@ -35,33 +35,42 @@ const router = useRouter();
 
 useEffect(() => {
   const userId = session?.user?.id;
-  const userRole = session?.user?.role;
-
   if (!userId) return;
 
-  const fetchData = async () => {
-    let role = userRole;
-
-    // Fallback if role is not in session
-    if (!role) {
+  const fetchUserRole = async (): Promise<string | null> => {
+    try {
       const res = await fetch(`/api/user/role?userId=${userId}`);
+      if (!res.ok) throw new Error('Failed to fetch user role');
       const data = await res.json();
-      if (res.ok) {
-        role = data.role;
-      } else {
-        console.error("Failed to fetch user role:", data.error);
-        return;
-      }
+      return data.role || null;
+    } catch (error) {
+      console.error(error);
+      return null;
     }
-
-    if (role === "CREATOR") {
-      fetchCreatedEvents(userId).then(setCreatedEvents);
-    }
-
-    fetchBookmarkedEvents(userId).then(setBookmarkedEvents);
   };
 
-  fetchData();
+  const loadEvents = async (role: string | null) => {
+    if (role === 'CREATOR') {
+      try {
+        const created = await fetchCreatedEvents(userId);
+        setCreatedEvents(created);
+      } catch (error) {
+        console.error('Failed to fetch created events:', error);
+      }
+    }
+    try {
+      const bookmarked = await fetchBookmarkedEvents(userId);
+      setBookmarkedEvents(bookmarked);
+    } catch (error) {
+      console.error('Failed to fetch bookmarked events:', error);
+    }
+  };
+
+  (async () => {
+    // Use role from session if available, else fetch
+    const role = session?.user?.role ?? (await fetchUserRole());
+    await loadEvents(role);
+  })();
 }, [session?.user?.id, session?.user?.role]);
 
 
