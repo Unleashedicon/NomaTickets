@@ -16,6 +16,7 @@ export default function AuthTabs() {
     const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
   const [bookmarkedEvents, setBookmarkedEvents] = useState<Event[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+const [userRole, setUserRole] = useState<string | null>(null);
 
 const router = useRouter();
   const handleEventClick = (event: Event) => {
@@ -68,6 +69,7 @@ useEffect(() => {
 
   (async () => {
     const role = await fetchUserRole();
+    setUserRole(role);
     await loadEvents(role);
   })();
 }, [session?.user?.id]);
@@ -145,7 +147,7 @@ useEffect(() => {
               Welcome back, {session.user?.name ?? session.user?.email}! 👋
             </CardTitle>
             <p className="text-muted-foreground">
-              {session.user?.role === 'CREATOR'
+              {userRole === 'CREATOR'
                 ? 'Manage your events and see what you’ve bookmarked.'
                 : 'Explore your bookmarked events and discover new ones.'}
             </p>
@@ -155,7 +157,7 @@ useEffect(() => {
         {/* Events Tabs */}
         <Tabs defaultValue="bookmarked" className="w-full">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            {session.user?.role === 'CREATOR' && (
+            {userRole === 'CREATOR' && (
               <TabsTrigger value="created">Created Events</TabsTrigger>
             )}
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
