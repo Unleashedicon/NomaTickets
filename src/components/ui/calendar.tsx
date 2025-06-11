@@ -49,7 +49,7 @@ export function DateRangePicker({
 
   const formatDateForInput = (date: Date | undefined) => {
     if (!date) return "";
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const formatDateRange = (range: DateRange | undefined) => {
@@ -73,16 +73,20 @@ export function DateRangePicker({
     onChange?.({ from: value?.from, to: newDate });
   };
 
-  const isInvalidRange =
-    value?.from && value?.to && value.from > value.to;
-
+  const isInvalidRange = value?.from && value?.to && value.from > value.to;
   const displayError = error || isInvalidRange;
   const displayErrorMessage = isInvalidRange
     ? "End date must be after start date"
     : errorMessage;
 
-  const inputClassName =
-    "flex h-10 w-full rounded-md border border-input bg-background text-foreground dark:bg-muted dark:text-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  const inputClassName = cn(
+    "flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background",
+    "bg-background text-foreground placeholder:text-muted-foreground",
+    "dark:bg-muted dark:text-white",
+    "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    "disabled:cursor-not-allowed disabled:opacity-50"
+  );
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -114,7 +118,12 @@ export function DateRangePicker({
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-auto p-4"
+          className={cn(
+            "w-auto p-4",
+            "bg-popover text-popover-foreground",
+            "dark:bg-popover dark:text-popover-foreground",
+            "border border-border rounded-md shadow-md"
+          )}
           align="start"
           side="bottom"
           sideOffset={4}
@@ -159,11 +168,7 @@ export function DateRangePicker({
             </div>
 
             <div className="flex justify-end">
-              <Button
-                size="sm"
-                onClick={() => setOpen(false)}
-                className="text-sm"
-              >
+              <Button size="sm" onClick={() => setOpen(false)} className="text-sm">
                 Done
               </Button>
             </div>
