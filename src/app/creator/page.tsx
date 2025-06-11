@@ -344,7 +344,10 @@ toast.success("Event created!", {
 
   <div className="space-y-2">
     <Label htmlFor="event-description">Event Description</Label>
-    <QuillEditor value={eventDescription} onChange={setEventDescription} />
+   <QuillEditor
+  value={eventDescription}
+  onChange={(html) => setEventDescription(html)}
+/>
   </div>
 
 

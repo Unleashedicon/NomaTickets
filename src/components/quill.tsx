@@ -1,39 +1,32 @@
-'use client'
+'use client';
 
-import React, { useEffect, useRef } from 'react'
-import Quill from 'quill'
-import 'quill/dist/quill.snow.css'
+import { useEffect, useRef, useState } from 'react';
+import 'quill/dist/quill.snow.css';
 
-type QuillEditorProps = {
-  value: string
-  onChange: (content: string) => void
-}
-
-export default function QuillEditor({ value, onChange }: QuillEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null)
-  const quillRef = useRef<Quill | null>(null)
+export default function QuillEditor({ value, onChange }: {
+  value: string;
+  onChange: (html: string) => void;
+}) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [quillInstance, setQuillInstance] = useState<any>(null);
 
   useEffect(() => {
-    if (editorRef.current && !quillRef.current) {
-      quillRef.current = new Quill(editorRef.current, {
-        theme: 'snow',
-        placeholder: 'Write your event description...',
-      })
+    if (typeof window !== 'undefined' && editorRef.current && !quillInstance) {
+      import('quill').then((Quill) => {
+        const quill = new Quill.default(editorRef.current!, {
+          theme: 'snow',
+        });
 
-      // Listen for text changes
-      quillRef.current.on('text-change', () => {
-        const html = editorRef.current?.querySelector('.ql-editor')?.innerHTML || ''
-        onChange(html)
-      })
+        quill.on('text-change', () => {
+          onChange(quill.root.innerHTML);
+        });
 
-      // Set initial content
-      quillRef.current.root.innerHTML = value
+        // Set initial value if provided
+        quill.root.innerHTML = value;
+        setQuillInstance(quill);
+      });
     }
-  }, [])
+  }, [editorRef, quillInstance, value, onChange]);
 
-  return (
-    <div className="border border-gray-300 rounded-md">
-      <div ref={editorRef} />
-    </div>
-  )
+  return <div ref={editorRef} />;
 }
