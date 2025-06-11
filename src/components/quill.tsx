@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import 'quill/dist/quill.snow.css';
+import type QuillType from 'quill'; // Import the type
 
 export default function QuillEditor({ value, onChange }: {
   value: string;
   onChange: (html: string) => void;
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [quillInstance, setQuillInstance] = useState<any>(null);
+  const [quillInstance, setQuillInstance] = useState<QuillType | null>(null); // ✅ Typed properly
 
   useEffect(() => {
     if (typeof window !== 'undefined' && editorRef.current && !quillInstance) {
