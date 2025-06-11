@@ -1,3 +1,4 @@
+'use client';
 
 import * as React from "react";
 import { format } from "date-fns";
@@ -18,27 +19,16 @@ export interface DateRange {
 }
 
 interface DateRangePickerProps {
-  /** The selected date range */
   value?: DateRange;
-  /** Callback when date range changes */
   onChange?: (range: DateRange | undefined) => void;
-  /** Label for the component */
   label?: string;
-  /** Placeholder text when no dates selected */
   placeholder?: string;
-  /** Helper text shown below the input */
   helperText?: string;
-  /** Error state */
   error?: boolean;
-  /** Error message */
   errorMessage?: string;
-  /** Disabled state */
   disabled?: boolean;
-  /** Custom class name */
   className?: string;
-  /** Minimum date that can be selected */
   minDate?: Date;
-  /** Maximum date that can be selected */
   maxDate?: Date;
 }
 
@@ -63,59 +53,48 @@ export function DateRangePicker({
   };
 
   const formatDateRange = (range: DateRange | undefined) => {
-    if (!range?.from) {
-      return placeholder;
-    }
-
-    if (range.from && !range.to) {
-      return format(range.from, "MMM dd, yyyy");
-    }
-
-    if (range.from && range.to) {
-      return `${format(range.from, "MMM dd, yyyy")} - ${format(range.to, "MMM dd, yyyy")}`;
-    }
-
+    if (!range?.from) return placeholder;
+    if (range.from && !range.to) return format(range.from, "MMM dd, yyyy");
+    if (range.from && range.to)
+      return `${format(range.from, "MMM dd, yyyy")} - ${format(
+        range.to,
+        "MMM dd, yyyy"
+      )}`;
     return placeholder;
   };
 
   const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    const newDate = dateValue ? new Date(dateValue) : undefined;
-    
-    onChange?.({
-      from: newDate,
-      to: value?.to,
-    });
+    const newDate = e.target.value ? new Date(e.target.value) : undefined;
+    onChange?.({ from: newDate, to: value?.to });
   };
 
   const handleToDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = e.target.value;
-    const newDate = dateValue ? new Date(dateValue) : undefined;
-    
-    onChange?.({
-      from: value?.from,
-      to: newDate,
-    });
+    const newDate = e.target.value ? new Date(e.target.value) : undefined;
+    onChange?.({ from: value?.from, to: newDate });
   };
 
-  const isInvalidRange = value?.from && value?.to && value.from > value.to;
+  const isInvalidRange =
+    value?.from && value?.to && value.from > value.to;
 
   const displayError = error || isInvalidRange;
-  const displayErrorMessage = isInvalidRange 
-    ? "End date must be after start date" 
+  const displayErrorMessage = isInvalidRange
+    ? "End date must be after start date"
     : errorMessage;
+
+  const inputClassName =
+    "flex h-10 w-full rounded-md border border-input bg-background text-foreground dark:bg-muted dark:text-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div className={cn("grid gap-2", className)}>
       {label && (
-        <Label 
+        <Label
           htmlFor="date-range-picker"
           className={cn(displayError && "text-destructive")}
         >
           {label}
         </Label>
       )}
-      
+
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -125,7 +104,7 @@ export function DateRangePicker({
             className={cn(
               "w-full justify-start text-left font-normal",
               !value?.from && "text-muted-foreground",
-              displayError && "border-destructive focus:ring-destructive",
+              displayError && "border-destructive focus:ring-destructive"
             )}
             aria-label={`${label}: ${formatDateRange(value)}`}
           >
@@ -133,9 +112,9 @@ export function DateRangePicker({
             {formatDateRange(value)}
           </Button>
         </PopoverTrigger>
-        
-        <PopoverContent 
-          className="w-auto p-4" 
+
+        <PopoverContent
+          className="w-auto p-4"
           align="start"
           side="bottom"
           sideOffset={4}
@@ -153,10 +132,10 @@ export function DateRangePicker({
                 disabled={disabled}
                 min={minDate ? formatDateForInput(minDate) : undefined}
                 max={maxDate ? formatDateForInput(maxDate) : undefined}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className={inputClassName}
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="end-date" className="text-sm font-medium">
                 End Date
@@ -167,15 +146,21 @@ export function DateRangePicker({
                 value={formatDateForInput(value?.to)}
                 onChange={handleToDateChange}
                 disabled={disabled}
-                min={value?.from ? formatDateForInput(value.from) : minDate ? formatDateForInput(minDate) : undefined}
+                min={
+                  value?.from
+                    ? formatDateForInput(value.from)
+                    : minDate
+                    ? formatDateForInput(minDate)
+                    : undefined
+                }
                 max={maxDate ? formatDateForInput(maxDate) : undefined}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className={inputClassName}
               />
             </div>
 
             <div className="flex justify-end">
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 onClick={() => setOpen(false)}
                 className="text-sm"
               >
@@ -187,10 +172,12 @@ export function DateRangePicker({
       </Popover>
 
       {(helperText || displayErrorMessage) && (
-        <p className={cn(
-          "text-sm",
-          displayError ? "text-destructive" : "text-muted-foreground"
-        )}>
+        <p
+          className={cn(
+            "text-sm",
+            displayError ? "text-destructive" : "text-muted-foreground"
+          )}
+        >
           {displayError ? displayErrorMessage : helperText}
         </p>
       )}
