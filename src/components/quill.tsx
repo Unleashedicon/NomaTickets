@@ -2,32 +2,39 @@
 
 import { useEffect, useRef, useState } from 'react';
 import 'quill/dist/quill.snow.css';
-import type QuillType from 'quill'; // Import the type
+import type QuillType from 'quill';
 
-export default function QuillEditor({ value, onChange }: {
+export default function QuillEditor({
+  value,
+  onChange,
+}: {
   value: string;
   onChange: (html: string) => void;
 }) {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [quillInstance, setQuillInstance] = useState<QuillType | null>(null); // ✅ Typed properly
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [quillInstance, setQuillInstance] = useState<QuillType | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && editorRef.current && !quillInstance) {
-      import('quill').then((Quill) => {
-        const quill = new Quill.default(editorRef.current!, {
-          theme: 'snow',
-        });
+    if (!wrapperRef.current || quillInstance) return;
 
-        quill.on('text-change', () => {
-          onChange(quill.root.innerHTML);
-        });
+    const editorDiv = document.createElement('div');
+    wrapperRef.current.innerHTML = ''; // 🧹 Clear previous renders
+    wrapperRef.current.appendChild(editorDiv);
 
-        // Set initial value if provided
-        quill.root.innerHTML = value;
-        setQuillInstance(quill);
+    import('quill').then((Quill) => {
+      const quill = new Quill.default(editorDiv, {
+        theme: 'snow',
       });
-    }
-  }, [editorRef, quillInstance, value, onChange]);
 
-  return <div ref={editorRef} />;
+      quill.root.innerHTML = value;
+
+      quill.on('text-change', () => {
+        onChange(quill.root.innerHTML);
+      });
+
+      setQuillInstance(quill);
+    });
+  }, [quillInstance, onChange, value]);
+
+  return <div ref={wrapperRef} />;
 }
