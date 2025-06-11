@@ -15,6 +15,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { Calendar, MapPin, Tag, User } from 'lucide-react';
 import { Event } from '@/components/EventCard'; // Adjust if needed
+import DOMPurify from 'dompurify';
 
 interface EventDetailsModalProps {
   event: Event | null;
@@ -61,9 +62,12 @@ const EventDetailsModal = ({ event, onClose }: EventDetailsModalProps) => {
       <DialogContent dividers sx={{ p: 3 }}>
         <Stack spacing={2}>
           {/* Description */}
-          <Typography variant="body1" color="text.secondary">
-            {event.description}
-          </Typography>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        component="div" // allow div wrapper to render HTML properly
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }}
+      />
 
           {/* Date */}
           <Box display="flex" alignItems="center" gap={1}>

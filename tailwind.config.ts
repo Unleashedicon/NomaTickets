@@ -33,7 +33,10 @@ const config: Config = {
       },
     },
   },
-  plugins: [flowbite],
+  plugins: [
+    flowbite,
+    require('flowbite-typography')
+  ],
 };
 
 export default config;

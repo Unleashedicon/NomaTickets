@@ -12,14 +12,8 @@ import { DateTimeRangePicker } from "@/components/datetimerangepicker"
 import imageCompression from 'browser-image-compression';
 import { toast } from 'sonner';
 import { DateRange } from "@/components/ui/calendar"
-
-const imageResizeConfig = {
-  quality: 0.8,
-  maxWidth: 1200,
-  maxHeight: 1200,
-  autoRotate: true,
-  debug: false,
-};
+import { useSession } from 'next-auth/react';
+import QuillEditor from '@/components/quill';
 // Note: The Flowbite JavaScript for tooltips and dropdowns is not automatically
 // integrated by simply including the HTML. For full interactivity of the
 // rich text editor toolbar or complex dropdowns, you would typically need
@@ -46,6 +40,8 @@ const [startTime, setStartTime] = useState("09:00")
 const [endTime, setEndTime] = useState("17:00")
   const imageFileInputRef = useRef<HTMLInputElement>(null);
   const nextTicketId = useRef(0); // To generate unique IDs for ticket rows
+  const { data: session } = useSession();
+
 
   // Function to show alerts
   const showAlert = (message: string, type: typeof alertType) => {
@@ -154,6 +150,10 @@ const handleTicketClassChange = (
   // Handle form submission
 const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
   event.preventDefault();
+     if (!session?.user?.id) {
+       toast.error('You need to be logged in to create events.');
+       return;
+     } 
 setIsSubmitting(true);
   // 1. Basic validation
   if (!eventTitle || !eventDescription || !eventLocation) {
@@ -182,7 +182,7 @@ if (!coordinates || coordinates.length !== 2) {
   return;
 }
 if (!date?.from || !startTime) {
-  alert("Please select a start date and time");
+  toast.error("Please select a start date and time");
   return;
 }
 
@@ -297,7 +297,7 @@ toast.success("Event created!", {
   
   return (
 <div className="min-h-screen bg-white flex justify-center items-start p-0 pb-28">
-  <div className="w-full max-w-2xl bg-gray-100 p-6 rounded-xl shadow-lg space-y-6">
+  <div className="w-full max-w-2xl bg-gray-100 dark:bg-gray-900 p-6 rounded-xl shadow-lg space-y-6">
         <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">Event Creator</h1>
 
         {alertMessage && (
@@ -342,100 +342,11 @@ toast.success("Event created!", {
             />
           </div>
 
-          {/* Event Description (Adapted Flowbite Rich Text Editor UI) */}
-          <div className="space-y-2">
-            <Label htmlFor="event-description">Event Description</Label>
-            <div className="w-full border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
-              <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-600">
-                <div className="flex flex-wrap items-center">
-                  <div className="flex items-center space-x-1 rtl:space-x-reverse flex-wrap">
-                    {/* Toolbar Buttons (UI only, no functionality without a rich text editor library) */}
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5h4.5a3.5 3.5 0 1 1 0 7H8m0-7v7m0-7H6m2 7h6.5a3.5 3.5 0 1 1 0 7H8m0-7v7m0 0H6"/>
-                      </svg>
-                      <span className="sr-only">Bold</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m8.874 19 6.143-14M6 19h6.33m-.66-14H18"/>
-                      </svg>
-                      <span className="sr-only">Italic</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M6 19h12M8 5v9a4 4 0 0 0 8 0V5M6 5h4m4 0h4"/>
-                      </svg>
-                      <span className="sr-only">Underline</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 6.2V5h12v1.2M7 19h6m.2-14-1.677 6.523M9.6 19l1.029-4M5 5l6.523 6.523M19 19l-7.477-7.477"/>
-                      </svg>
-                      <span className="sr-only">Strike</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.9999 21h-4v-.5c1.0989-1.0329 3.75-2.5 3.75-3.5v-1.0001c0-.5523-.4477-.9999-1-.9999h-1.75c-.5523 0-1 .4477-1 1M3.99986 6l9.26894 11.5765M13.1219 6 3.85303 17.5765"/>
-                      </svg>
-                      <span className="sr-only">Subscript</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21.0002 11h-4l-.0001-.5C18.099 9.46711 20.7502 8 20.7502 7V5.99989c0-.55228-.4478-.99989-1-.99989h-1.75c-.5523 0-1 .44772-1 1M5.37837 7.98274 14.6473 19.5593m-.5251-11.25583L4.85547 19.8773"/>
-                      </svg>
-                      <span className="sr-only">Superscript</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M9 19.2H5.5c-.3 0-.5-.2-.5-.5V16c0-.2.2-.4.5-.4h13c.3 0 .5.2.5.4v2.7c0 .3-.2.5-.5.5H18m-6-1 1.4 1.8h.2l1.4-1.7m-7-5.4L12 4c0-.1 0-.1 0 0l4 8.8m-6-2.7h4m-7 2.7h2.5m5 0H17"/>
-                      </svg>
-                      <span className="sr-only">Highlight</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m8 8-4 4 4 4m8 0 4-4-4-4m-2-3-4 14"/>
-                      </svg>
-                      <span className="sr-only">Code</span>
-                    </button>
-                    {/* Text size, color, font family dropdowns are complex.
-                        For a full implementation, consider a rich text editor library.
-                        Here, they are just buttons for UI purposes. */}
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6.2V5h11v1.2M8 5v14m-3 0h6m2-6.8V11h8v1.2M17 11v8m-1.5 0h3"/>
-                      </svg>
-                      <span className="sr-only">Text size</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="25" height="24" fill="none" viewBox="0 0 25 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="m6.532 15.982 1.573-4m-1.573 4h-1.1m1.1 0h1.65m-.077-4 2.725-6.93a.11.11 0 0 1 .204 0l2.725 6.93m-5.654 0H8.1m.006 0h5.654m0 0 .617 1.569m5.11 4.453c0 1.102-.854 1.996-1.908 1.996-1.053 0-1.907-.894-1.907-1.996 0-1.103 1.907-4.128 1.907-4.128s1.909 3.025 1.909 4.128Z"/>
-                      </svg>
-                      <span className="sr-only">Text color</span>
-                    </button>
-                    <button type="button" className="p-1.5 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600">
-                      <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m10.6 19 4.298-10.93a.11.11 0 0 1 .204 0L19.4 19m-8.8 0H9.5m1.1 0h1.65m7.15 0h-1.65m1.65 0h1.1m-7.7-3.985h4.4M3.021 16l1.567-3.985m0 0L7.32 5.07a.11.11 0 0 1 .205 0l2.503 6.945h-5.44Z"/>
-                      </svg>
-                      <span className="sr-only">Font family</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="px-4 py-2 bg-white rounded-b-lg dark:bg-gray-800">
-                <label htmlFor="event-description" className="sr-only">Write description</label>
-                <textarea
-                  id="event-description"
-                  className="block w-full px-0 text-sm text-gray-800 bg-white border-0 dark:bg-gray-800 focus:ring-0 dark:text-white dark:placeholder-gray-400 resize-none"
-                  rows={6} // Adjust rows as needed
-                  placeholder="Write your event description..."
-                  value={eventDescription}
-                  onChange={(e) => setEventDescription(e.target.value)}
-                  required
-                ></textarea>
-              </div>
-            </div>
-          </div>
+  <div className="space-y-2">
+    <Label htmlFor="event-description">Event Description</Label>
+    <QuillEditor value={eventDescription} onChange={setEventDescription} />
+  </div>
+
 
 <div className="space-y-2">
   <Label htmlFor="event-image-upload">Event Image</Label>

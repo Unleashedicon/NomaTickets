@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import EventCard from '@/components/EventCard';
 import { Event } from '@/components/EventCard';
 import LocationAutocomplete from '@/components/locationautocomplete';
@@ -177,59 +176,72 @@ const HomePage = () => {
       </section>
 
       {/* Filters Section */}
-      <section className="sticky top-16 z-40 bg-white border-b shadow-sm py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="w-full max-w-sm">
-              <Label>Category</Label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    'music','sports','theatre','comedy','conference','workshop',
-                    'festival','food_drink','networking','charity','family','art','technology'
-                  ].map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat[0].toUpperCase() + cat.slice(1).replace('_', ' & ')}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+ <section className="sticky top-16 z-0 bg-white dark:bg-black border-b dark:border-gray-800 shadow-sm py-4">
+  <div className="container mx-auto px-4">
+    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      
+      {/* Category */}
+      <div className="w-full max-w-sm">
+        <Label htmlFor="event-category">Category</Label>
+        <select
+          id="event-category"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                     focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+                     dark:bg-gray-900 dark:border-gray-700 dark:placeholder-gray-400 dark:text-white
+                     dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        >
+          <option value="" disabled>
+            Select category that best describes your event
+          </option>
+          {[
+            'music', 'sports', 'theatre', 'comedy', 'conference', 'workshop',
+            'festival', 'food_drink', 'networking', 'charity', 'family', 'art', 'technology'
+          ].map(cat => (
+            <option key={cat} value={cat}>
+              {cat[0].toUpperCase() + cat.slice(1).replace('_', ' & ')}
+            </option>
+          ))}
+        </select>
+      </div>
 
-            <div className="w-full max-w-sm">
-              <Label htmlFor="event-date">Date</Label>
-              <input
-                id="event-date"
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5"
-              />
-            </div>
+      {/* Date */}
+      <div className="w-full max-w-sm">
+        <Label htmlFor="event-date">Date</Label>
+        <input
+          id="event-date"
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5
+                     dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+        />
+      </div>
 
-            <div className="w-full max-w-sm space-y-1">
-              <Label>Location</Label>
-              <LocationAutocomplete
-                onSelect={(loc) => {
-                  const readable = `${loc.name}, ${loc.city ?? ''}, ${loc.country ?? ''}`.trim();
-                  setSelectedLocation(readable);
-                }}
-              />
-            </div>
+      {/* Location */}
+      <div className="w-full max-w-sm space-y-1">
+        <Label>Location</Label>
+        <LocationAutocomplete
+          onSelect={(loc) => {
+            const readable = `${loc.name}, ${loc.city ?? ''}, ${loc.country ?? ''}`.trim();
+            setSelectedLocation(readable);
+          }}
+        />
+      </div>
 
-            <div className="w-full max-w-sm">
-              <Button
-                onClick={isFilterApplied ? clearFilters : applyFilters}
-                className="bg-[#1D4ED8] text-white hover:bg-blue-700 w-full"
-              >
-                {isFilterApplied ? 'Clear Filters' : 'Apply Filters'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      {/* Button */}
+      <div className="w-full max-w-sm">
+        <Button
+          onClick={isFilterApplied ? clearFilters : applyFilters}
+          className="bg-[#1D4ED8] text-white hover:bg-blue-700 w-full"
+        >
+          {isFilterApplied ? 'Clear Filters' : 'Apply Filters'}
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
       {/* Events Grid */}
       <section ref={eventGridRef} className="py-12">
         <div className="container mx-auto px-4">

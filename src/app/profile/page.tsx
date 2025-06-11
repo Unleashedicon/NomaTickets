@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import EventsList from '@/components/EventsList';
 import { Event } from '@/components/EventCard';
 import EventDetailsModal from '@/components/EventModal';
+import { toast } from "sonner";
 
 export default function AuthTabs() {
   const [tab, setTab] = useState("login");
@@ -57,7 +58,7 @@ const router = useRouter();
     };
 
     if (payload.password !== payload.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -69,10 +70,10 @@ const router = useRouter();
 
     const data = await res.json();
     if (res.ok) {
-      alert("Signup successful!");
-  router.push("/");
+      toast.success("Signup successful!");
+  router.push("/profile");
     } else {
-      alert(data.error || "Signup failed");
+      toast.error(data.error || "Signup failed");
     }
   };
 
@@ -90,10 +91,10 @@ const router = useRouter();
     });
 
     if (res?.error) {
-      alert(res.error);
+    toast.error(res.error || "Check your details and try again");
     } else {
-      alert("Login successful");
-        router.push("/");
+        toast.success("Login successful");
+        router.push("/profile");
     }
   };
   if (status === 'loading') {

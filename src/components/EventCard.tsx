@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Heart } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { toast } from "sonner";
 
 export interface TicketClass {
   id: string;
@@ -94,7 +95,7 @@ for (const tier of priorities) {
 
   const toggleBookmark = async () => {
     if (!session?.user?.id) {
-      alert('You need to be logged in to bookmark events.');
+      toast.error('You need to be logged in to bookmark events.');
       return;
     }
 

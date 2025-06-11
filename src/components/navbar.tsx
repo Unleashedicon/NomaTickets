@@ -18,7 +18,7 @@ export default function MyNavbar() {
           {/* Logo */}
 <Link href="/" className="flex flex-col items-center text-center">
                           <Ticket className="h-8 w-8 text-[#1D4ED8]" />
-              <span className="text-xl font-bold text-[#111827]">NomaTickets</span>
+        <span className="text-xl font-bold text-[#111827] dark:text-white">NomaTickets</span>
           </Link>
 
           {/* Search Bar */}
