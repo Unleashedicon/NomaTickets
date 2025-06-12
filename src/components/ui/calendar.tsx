@@ -49,17 +49,15 @@ export function DateRangePicker({
 
   const formatDateForInput = (date: Date | undefined) => {
     if (!date) return "";
-    return date.toISOString().split("T")[0];
+    return date.toISOString().split('T')[0];
   };
 
   const formatDateRange = (range: DateRange | undefined) => {
     if (!range?.from) return placeholder;
     if (range.from && !range.to) return format(range.from, "MMM dd, yyyy");
-    if (range.from && range.to)
-      return `${format(range.from, "MMM dd, yyyy")} - ${format(
-        range.to,
-        "MMM dd, yyyy"
-      )}`;
+    if (range.from && range.to) {
+      return `${format(range.from, "MMM dd, yyyy")} - ${format(range.to, "MMM dd, yyyy")}`;
+    }
     return placeholder;
   };
 
@@ -78,15 +76,6 @@ export function DateRangePicker({
   const displayErrorMessage = isInvalidRange
     ? "End date must be after start date"
     : errorMessage;
-
-  const inputClassName = cn(
-    "flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background",
-    "bg-background text-foreground placeholder:text-muted-foreground",
-    "dark:bg-muted dark:text-white",
-    "file:border-0 file:bg-transparent file:text-sm file:font-medium",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-    "disabled:cursor-not-allowed disabled:opacity-50"
-  );
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -119,10 +108,9 @@ export function DateRangePicker({
 
         <PopoverContent
           className={cn(
-            "w-auto p-4",
-            "bg-popover text-popover-foreground",
-            "dark:bg-popover dark:text-popover-foreground",
-            "border border-border rounded-md shadow-md"
+            "w-auto p-4 rounded-md shadow-md border border-border",
+            "bg-white text-black",
+            "dark:bg-zinc-900 dark:text-white"
           )}
           align="start"
           side="bottom"
@@ -141,7 +129,14 @@ export function DateRangePicker({
                 disabled={disabled}
                 min={minDate ? formatDateForInput(minDate) : undefined}
                 max={maxDate ? formatDateForInput(maxDate) : undefined}
-                className={inputClassName}
+                className={cn(
+                  "flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background",
+                  "bg-white text-black dark:bg-zinc-800 dark:text-white",
+                  "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+                  "placeholder:text-muted-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "disabled:cursor-not-allowed disabled:opacity-50"
+                )}
               />
             </div>
 
@@ -155,15 +150,16 @@ export function DateRangePicker({
                 value={formatDateForInput(value?.to)}
                 onChange={handleToDateChange}
                 disabled={disabled}
-                min={
-                  value?.from
-                    ? formatDateForInput(value.from)
-                    : minDate
-                    ? formatDateForInput(minDate)
-                    : undefined
-                }
+                min={value?.from ? formatDateForInput(value.from) : minDate ? formatDateForInput(minDate) : undefined}
                 max={maxDate ? formatDateForInput(maxDate) : undefined}
-                className={inputClassName}
+                className={cn(
+                  "flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background",
+                  "bg-white text-black dark:bg-zinc-800 dark:text-white",
+                  "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+                  "placeholder:text-muted-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "disabled:cursor-not-allowed disabled:opacity-50"
+                )}
               />
             </div>
 
