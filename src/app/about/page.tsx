@@ -32,7 +32,7 @@ const About = () => {
               for everyone across Kenya and East Africa.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              Whether you're looking for cultural festivals, business conferences, music concerts, or community gatherings, 
+              Whether you are looking for cultural festivals, business conferences, music concerts, or community gatherings, 
               NomaTickets is your trusted companion in exploring the vibrant event landscape of our region.
             </p>
           </CardContent>
@@ -64,7 +64,7 @@ const About = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Save events you're interested in and never miss out on experiences that matter to you. 
+                Save events you are interested in and never miss out on experiences that matter to you. 
                 Get notified about updates and upcoming events.
               </p>
             </CardContent>
@@ -91,7 +91,7 @@ const About = () => {
           <CardHeader>
             <CardTitle className="text-2xl">Get in Touch</CardTitle>
             <p className="text-muted-foreground">
-              We'd love to hear from you! Whether you have questions, need support, or want to share feedback, 
+              We would love to hear from you! Whether you have questions, need support, or want to share feedback, 
               our team is here to help.
             </p>
           </CardHeader>
