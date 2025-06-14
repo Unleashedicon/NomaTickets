@@ -61,12 +61,12 @@ export async function POST(req: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    if (!token?.sub) {
+    if (!token?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Now you have the user ID in token.sub
-    const userId = token.sub;
+    const userId = token.id;
 
     const body = await req.json();
     const {
