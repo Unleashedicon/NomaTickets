@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -55,26 +56,22 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  try {
-    const token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
+ try {
+    const session = await auth();
 
-    if (!token?.id) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Now you have the user ID in token.sub
-    const userId = token.id;
+    const userId = session.user.id;
 
     const body = await req.json();
     const {
       title,
       description,
       location,
-        latitude,
-  longitude,
+      latitude,
+      longitude,
       startDate,
       endDate,
       imageUrl,
@@ -86,8 +83,9 @@ export async function POST(req: NextRequest) {
     if (
       !title ||
       !description ||
-      !location ||  typeof latitude !== "number" ||
-  typeof longitude !== "number" ||
+      !location ||
+      typeof latitude !== "number" ||
+      typeof longitude !== "number" ||
       !startDate ||
       !category ||
       !ticketClasses ||
@@ -104,9 +102,9 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         description,
-        location,    
+        location,
         latitude,
-    longitude,
+        longitude,
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
         imageUrl,
