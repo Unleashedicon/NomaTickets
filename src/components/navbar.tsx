@@ -103,11 +103,18 @@ export default function MyNavbar() {
 
         <div className="py-4 overflow-y-auto">
           <ul className="space-y-2 font-medium">
-            {["Dashboard", "Services", "Pricing", "Contact"].map((item) => (
-              <li key={item}>
-                <a href="#" className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                  {item}
-                </a>
+            {[
+              { name: "Dashboard", href: "/" },
+              { name: "Pricing", href: "/pricing" },
+              { name: "About", href: "/about" },
+            ].map(({ name, href }) => (
+              <li key={name}>
+                <Link
+                  href={href}
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                >
+                  {name}
+                </Link>
               </li>
             ))}
           </ul>
