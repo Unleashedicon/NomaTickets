@@ -28,7 +28,6 @@ export async function GET(req: Request) {
 }
 
 // DELETE event by ID
-// DELETE event by ID
 export async function DELETE(req: Request) {
   try {
     const body = await req.json();
@@ -37,9 +36,17 @@ export async function DELETE(req: Request) {
     if (!eventId) {
       return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
     }
+    await prisma.ticket.deleteMany({
+      where: { eventId },
+    });
 
-    // First delete related ticketClasses
+    // 2. Delete related ticket classes
     await prisma.ticketClass.deleteMany({
+      where: { eventId },
+    });
+
+    // 3. Delete related bookmarks
+    await prisma.bookmarkedEvent.deleteMany({
       where: { eventId },
     });
 
