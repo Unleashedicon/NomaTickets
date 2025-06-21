@@ -76,7 +76,9 @@ const router = useRouter();
       toast.error(data.error || "Signup failed");
     }
   };
-
+const handleEventDelete = (eventId: string) => {
+  setCreatedEvents((prev) => prev.filter((event) => event.id !== eventId));
+};
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -131,29 +133,29 @@ const router = useRouter();
             <TabsTrigger value="bookmarked">Bookmarked Events</TabsTrigger>
           </TabsList>
 
-          {session.user?.role === 'CREATOR' && (
-            <TabsContent value="created" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Your Created Events</CardTitle>
-                  <p className="text-muted-foreground">
-                    Events you have created and are hosting.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <EventsList
-events={createdEvents}
-                    emptyStateTitle="No events created yet"
-                    emptyStateDescription="Start creating amazing events for your community!"
-                    emptyStateEmoji="🎯"
-                            onEventClick={handleEventClick}
-
-                  />
-                  
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
+   {session.user?.role === 'CREATOR' && (
+  <TabsContent value="created" className="mt-6">
+    <Card>
+      <CardHeader>
+        <CardTitle>Your Created Events</CardTitle>
+        <p className="text-muted-foreground">
+          Events you have created and are hosting.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <EventsList
+          events={createdEvents}
+          emptyStateTitle="No events created yet"
+          emptyStateDescription="Start creating amazing events for your community!"
+          emptyStateEmoji="🎯"
+          onEventClick={handleEventClick}
+          showDelete
+          onDelete={handleEventDelete} // ✅ pass the delete handler
+        />
+      </CardContent>
+    </Card>
+  </TabsContent>
+)}
 
           <TabsContent value="bookmarked" className="mt-6">
             <Card>

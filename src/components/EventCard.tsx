@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Heart } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { toast } from "sonner";
+import { Trash2 } from 'lucide-react';
 
 export interface TicketClass {
   id: string;
@@ -30,12 +31,14 @@ export interface Event {
   soldOut?: boolean;
   ticketClasses?: TicketClass[];
 }
-
 interface EventCardProps {
   event: Event;
+  onDelete?: (eventId: string) => void;
+  showDelete?: boolean;
 }
 
-const EventCard = ({ event }: EventCardProps) => {
+
+const EventCard = ({ event, onDelete, showDelete }: EventCardProps) => {
   const [isBookmarked, setIsBookmarked] = useState(event.isBookmarked || false);
   const { data: session } = useSession();
 
@@ -188,6 +191,68 @@ for (const tier of priorities) {
             <span className="line-clamp-1">{event.location}</span>
           </div>
         </div>
+{showDelete && (
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+
+      toast.custom((t) => (
+        <div className="bg-white shadow-lg rounded-md p-4 w-[300px]">
+          <p className="text-sm font-medium text-gray-900 mb-2">
+            Delete this event?
+          </p>
+          <p className="text-xs text-gray-500 mb-4">
+            This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={() => toast.dismiss(t)}
+              className="text-sm px-3 py-1 rounded hover:bg-gray-100 text-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+             onClick={async () => {
+  try {
+    const res = await fetch('/api/events/created', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ eventId: event.id }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Failed to delete event');
+    }
+
+    toast.success('Event deleted successfully');
+    toast.dismiss(t);
+
+    if (onDelete) {
+      onDelete(event.id); // 🔁 Update parent UI
+    }
+  } catch (err) {
+    toast.error('Failed to delete event');
+  }
+}}
+
+              className="text-sm px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ));
+    }}
+    className="absolute top-3 right-3 text-red-500 hover:text-red-700 z-10 bg-white/90 rounded-full p-1"
+    title="Delete"
+  >
+    <Trash2 size={18} />
+  </button>
+)}
+
 
         {/* Ticket Count Indicator */}
         {event.ticketsLeft !== undefined && event.ticketsLeft < 20 && !event.soldOut && (
